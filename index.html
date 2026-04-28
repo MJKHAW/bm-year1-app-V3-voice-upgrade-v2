@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BM Game App</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(#8ee7ff,#fff7d6);
+}
+
+/* ===== MAP ===== */
+#mapPage{
+  padding:20px;
+}
+
+.map-title{
+  text-align:center;
+  font-size:36px;
+  color:#01579b;
+}
+
+.map-container{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:20px;
+  margin-top:20px;
+}
+
+/* ===== BEAUTIFUL ISLAND ===== */
+.island-card{
+  height:160px;
+  border-radius:40px;
+  background:
+    linear-gradient(to bottom,#4fc3f7 0%,#0288d1 50%,#8bc34a 50%,#558b2f 100%);
+  border:6px solid white;
+  box-shadow:0 10px 0 #2e7d32,0 15px 20px rgba(0,0,0,0.3);
+  position:relative;
+  cursor:pointer;
+  text-align:center;
+  color:white;
+  transition:0.2s;
+}
+
+.island-card:hover{
+  transform:scale(1.08) rotate(-2deg);
+}
+
+/* coconut tree */
+.island-card::before{
+  content:"🌴";
+  position:absolute;
+  top:8px;
+  left:10px;
+  font-size:34px;
+}
+
+/* treasure */
+.island-card::after{
+  content:"💎";
+  position:absolute;
+  top:8px;
+  right:10px;
+  font-size:26px;
+}
+
+.code{
+  margin-top:50px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.name{
+  font-size:13px;
+  background:rgba(255,255,255,0.3);
+  margin:5px;
+  padding:4px;
+  border-radius:10px;
+}
+
+.stars{
+  font-size:18px;
+}
+
+/* ===== MAIN APP ===== */
+.app{
+  display:none;
+  max-width:800px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border-radius:20px;
+}
+
+.word-box{
+  font-size:80px;
+  text-align:center;
+  background:#fff3e0;
+  border-radius:20px;
+  padding:20px;
+}
+
+button{
+  padding:12px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MAP -->
+<div id="mapPage">
+  <h1 class="map-title">🏝 Pilih Kemahiran</h1>
+  <div class="map-container" id="mapContainer"></div>
+</div>
+
+<!-- APP -->
+<div class="app">
+  <h2 id="moduleTitle"></h2>
+  <div class="word-box" id="word"></div>
+
+  <button onclick="startListening()">🎤 Speak</button>
+  <button onclick="nextWord()">Next</button>
+
+  <p id="result"></p>
+  <p>Score: <span id="score">0</span></p>
+
+  <button onclick="goBack()">⬅ Back</button>
+</div>
+
+<script>
+
+/* SIMPLE MODULE (TEST FIRST) */
+const modules=[
+  {name:"BM01 Vokal",words:["a","e","i","o","u"]},
+  {name:"BM05 KV",words:["ba","bi","bu","ca"]},
+  {name:"BM06 KVK",words:["bas","jam","pen"]}
+];
+
+let currentModule=0;
+let currentWord=0;
+let score=0;
+
+/* BUILD MAP */
+function buildMap(){
+  let map=document.getElementById("mapContainer");
+  map.innerHTML="";
+
+  modules.forEach((m,i)=>{
+    let div=document.createElement("div");
+    div.className="island-card";
+    div.onclick=()=>openModule(i);
+
+    div.innerHTML=`
+      <div class="code">${m.name}</div>
+      <div class="name">Klik untuk mula</div>
+      <div class="stars">⭐⭐⭐</div>
+    `;
+
+    map.appendChild(div);
+  });
+}
+
+/* OPEN */
+function openModule(i){
+  currentModule=i;
+  currentWord=0;
+  score=0;
+
+  document.getElementById("mapPage").style.display="none";
+  document.querySelector(".app").style.display="block";
+
+  loadWord();
+}
+
+/* LOAD WORD */
+function loadWord(){
+  document.getElementById("moduleTitle").innerHTML=modules[currentModule].name;
+  document.getElementById("word").innerHTML=modules[currentModule].words[currentWord];
+}
+
+/* NEXT */
+function nextWord(){
+  currentWord++;
+  if(currentWord>=modules[currentModule].words.length) currentWord=0;
+  loadWord();
+}
+
+/* VOICE */
+function startListening(){
+  let rec=new webkitSpeechRecognition();
+  rec.lang="ms-MY";
+  rec.start();
+
+  rec.onresult=function(e){
+    let spoken=e.results[0][0].transcript.toLowerCase();
+    let correct=modules[currentModule].words[currentWord];
+
+    if(spoken.includes(correct)){
+      document.getElementById("result").innerHTML="✅ Betul!";
+      score++;
+    }else{
+      document.getElementById("result").innerHTML="❌ Cuba lagi";
+    }
+
+    document.getElementById("score").innerHTML=score;
+  }
+}
+
+/* BACK */
+function goBack(){
+  document.querySelector(".app").style.display="none";
+  document.getElementById("mapPage").style.display="block";
+}
+
+buildMap();
+
+</script>
+
+</body>
+</html>
