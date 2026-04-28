@@ -8,7 +8,7 @@
 <style>
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
   background:linear-gradient(#8ee7ff,#fff7d6);
 }
 
@@ -25,64 +25,50 @@ body{
 
 .map-container{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:20px;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:24px;
   margin-top:20px;
 }
 
-/* ===== BEAUTIFUL ISLAND ===== */
+/* ===== CANVA ISLAND IMAGE ===== */
 .island-card{
-  height:160px;
-  border-radius:40px;
-  background:
-    linear-gradient(to bottom,#4fc3f7 0%,#0288d1 50%,#8bc34a 50%,#558b2f 100%);
-  border:6px solid white;
-  box-shadow:0 10px 0 #2e7d32,0 15px 20px rgba(0,0,0,0.3);
-  position:relative;
+  height:190px;
+  background-image:url("island.png");
+  background-size:contain;
+  background-repeat:no-repeat;
+  background-position:center;
+  border:none;
+  box-shadow:none;
   cursor:pointer;
   text-align:center;
   color:white;
+  position:relative;
   transition:0.2s;
+  padding-top:82px;
 }
 
 .island-card:hover{
-  transform:scale(1.08) rotate(-2deg);
-}
-
-/* coconut tree */
-.island-card::before{
-  content:"🌴";
-  position:absolute;
-  top:8px;
-  left:10px;
-  font-size:34px;
-}
-
-/* treasure */
-.island-card::after{
-  content:"💎";
-  position:absolute;
-  top:8px;
-  right:10px;
-  font-size:26px;
+  transform:scale(1.1);
 }
 
 .code{
-  margin-top:50px;
-  font-size:20px;
+  font-size:18px;
   font-weight:bold;
+  text-shadow:2px 2px 4px #000;
 }
 
 .name{
   font-size:13px;
-  background:rgba(255,255,255,0.3);
-  margin:5px;
+  background:rgba(0,0,0,0.35);
+  margin:5px auto;
   padding:4px;
   border-radius:10px;
+  width:120px;
 }
 
 .stars{
   font-size:18px;
+  text-shadow:2px 2px 4px #000;
 }
 
 /* ===== MAIN APP ===== */
@@ -115,13 +101,11 @@ button{
 
 <body>
 
-<!-- MAP -->
 <div id="mapPage">
   <h1 class="map-title">🏝 Pilih Kemahiran</h1>
   <div class="map-container" id="mapContainer"></div>
 </div>
 
-<!-- APP -->
 <div class="app">
   <h2 id="moduleTitle"></h2>
   <div class="word-box" id="word"></div>
@@ -136,8 +120,6 @@ button{
 </div>
 
 <script>
-
-/* SIMPLE MODULE (TEST FIRST) */
 const modules=[
   {name:"BM01 Vokal",words:["a","e","i","o","u"]},
   {name:"BM05 KV",words:["ba","bi","bu","ca"]},
@@ -148,7 +130,6 @@ let currentModule=0;
 let currentWord=0;
 let score=0;
 
-/* BUILD MAP */
 function buildMap(){
   let map=document.getElementById("mapContainer");
   map.innerHTML="";
@@ -168,11 +149,13 @@ function buildMap(){
   });
 }
 
-/* OPEN */
 function openModule(i){
   currentModule=i;
   currentWord=0;
   score=0;
+
+  document.getElementById("score").innerHTML=score;
+  document.getElementById("result").innerHTML="";
 
   document.getElementById("mapPage").style.display="none";
   document.querySelector(".app").style.display="block";
@@ -180,22 +163,26 @@ function openModule(i){
   loadWord();
 }
 
-/* LOAD WORD */
 function loadWord(){
   document.getElementById("moduleTitle").innerHTML=modules[currentModule].name;
   document.getElementById("word").innerHTML=modules[currentModule].words[currentWord];
 }
 
-/* NEXT */
 function nextWord(){
   currentWord++;
   if(currentWord>=modules[currentModule].words.length) currentWord=0;
   loadWord();
 }
 
-/* VOICE */
 function startListening(){
-  let rec=new webkitSpeechRecognition();
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
+    document.getElementById("result").innerHTML="❌ Please use Google Chrome";
+    return;
+  }
+
+  let rec=new SpeechRecognition();
   rec.lang="ms-MY";
   rec.start();
 
@@ -207,21 +194,19 @@ function startListening(){
       document.getElementById("result").innerHTML="✅ Betul!";
       score++;
     }else{
-      document.getElementById("result").innerHTML="❌ Cuba lagi";
+      document.getElementById("result").innerHTML="❌ Cuba lagi (" + spoken + ")";
     }
 
     document.getElementById("score").innerHTML=score;
   }
 }
 
-/* BACK */
 function goBack(){
   document.querySelector(".app").style.display="none";
   document.getElementById("mapPage").style.display="block";
 }
 
 buildMap();
-
 </script>
 
 </body>
